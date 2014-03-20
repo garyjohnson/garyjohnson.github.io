@@ -199,7 +199,7 @@ Then(/^I should see '(.*)'$/) do |message|
 end
 {% endhighlight %}
 
-Okay, so in our page object, label(:message) created **page.message**, which we can read for a string. The **.should eq** comes from (rspec-expectations)[https://github.com/rspec/rspec-expectations] and will fail the test if our UI doesn't match the message passed into the step.
+Okay, so in our page object, label(:message) created **page.message**, which we can read for a string. The **.should eq** comes from [rspec-expectations](https://github.com/rspec/rspec-expectations) and will fail the test if our UI doesn't match the message passed into the step.
 <br/><br/>
 Finally, you need to set up your env.rb. Create or open the file **/features/support/env.rb**. It needs to look like this:
 
