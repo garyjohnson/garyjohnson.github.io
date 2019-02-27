@@ -14,7 +14,7 @@ It's time for a new project! I've been starting projects and enjoying not finish
 
 ## The Idea
 
-A few years ago I built a build [button](https://www.automationdirect.com/adc/shopping/catalog/pushbuttons_-z-_switches_-z-_indicators/22mm_metal/mushroom_pushbuttons_illuminated_-a-_non-illuminated/gcx1137) to run my tests -- a simple [Teensy](https://www.pjrc.com/teensy/teensy31.html) that connects as a HID keyboard and sends a key combo when the button is pushed. In IDEs, I bound the key combo to running teests, and in iTerm to send `rake spec \n` (not very flexible for moving between types of projects).
+A few years ago I built a build [button](https://www.automationdirect.com/adc/shopping/catalog/pushbuttons_-z-_switches_-z-_indicators/22mm_metal/mushroom_pushbuttons_illuminated_-a-_non-illuminated/gcx1137) to run my tests -- a simple [Teensy](https://www.pjrc.com/teensy/teensy31.html) that connects as a HID keyboard and sends a key combo when the button is pushed. In IDEs, I bound the key combo to running tests, and in iTerm to send `rake spec \n` (not very flexible for moving between types of projects).
 <br>
 <br>
 ![original button](../../images/button01/button.jpg)
