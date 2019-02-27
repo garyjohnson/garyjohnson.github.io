@@ -27,7 +27,7 @@ The [Adafruit Feather nrf52832](https://www.adafruit.com/product/3406) is relati
 ![feather nrf52832](../../images/button01/nrf.jpg)
 <br>
 <br>
-So that's the plan! A bluetooth button that can run my tests and has an internal battery with USB charging.
+So that's the plan -- a bluetooth button that can run my tests and has an internal battery with USB charging.
 <br>
 <br>
 ![button sketch](../../images/button01/button-sketch.jpg)
@@ -39,7 +39,7 @@ So that's the plan! A bluetooth button that can run my tests and has an internal
 There's a couple other things I'd like to tackle as part of this project, all of them negotiable:
 
 * Utilizing [deep sleep capabilities on the nrf52](https://github.com/arduino-libraries/ArduinoLowPower/blob/master/examples/PrimoDeepSleep/PrimoDeepSleep.ino) for really, really long battery life
-* Running the correct test command based on the project / directory
+* Running the correct test command based on the project or directory
 * Ability to easily open and close the enclosure without additional hardware:
 ![snap design](../../images/button01/button-snap.jpg)
 * I want the button to provide feedback at minimum, and maybe have the capability of being an I/O device. Could be some combination of sound, vibration, and light. Here's some ideas incorporating an [Adafruit NeoPixel Ring](https://www.adafruit.com/product/1586):
@@ -48,7 +48,7 @@ There's a couple other things I'd like to tackle as part of this project, all of
 
 ## Next Steps
 
-So that's it! Next post I'll dive into building the MVP:
+That's it! Next post I'll dive into building the MVP:
 
 * Press the built-in button on the nrf52 and be able to trigger a bluetooth keyboard press
 * Wiring up the button, nrf52, battery, power switch
