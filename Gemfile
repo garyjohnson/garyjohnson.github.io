@@ -1,6 +1,8 @@
-source 'https://rubygems.org'
+source "https://rubygems.org"
 
-gem 'jekyll'
+gem "jekyll", "~> 3.0"
+gem "jekyll-sitemap"
+gem "jekyll-gist"
+gem "octopress"
 gem 'kramdown'
-gem 'guard-jekyll'
 gem 'pygments.rb'
