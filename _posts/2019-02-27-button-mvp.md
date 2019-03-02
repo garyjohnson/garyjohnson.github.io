@@ -81,10 +81,8 @@ I really wanted to avoid the Arduino IDE as much as possible -- I do a lot of my
 
 I started with [ino](https://github.com/amperka/ino), but unfortunately the last commit was in 2014 and it no longer functions with the latest version of Arduino IDE.
 
-Then I 
-
-The 
+Then I tried using the [arduino-cli](https://github.com/arduino/arduino-cli) to build a [Makefile (GitHub)](https://github.com/garyjohnson/build-button/blob/cf1c7cafbe215add65a0cb004e41e90da2040dd3/firmware/Makefile) but couldn't quite get it functioning with the Adafruit nrf52.
 
 ## Next Steps
 
-It's 
+It's time to design an enclosure!
