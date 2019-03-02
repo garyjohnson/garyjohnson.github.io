@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Project Planning: the bluetooth build button"
+title:  "Bluetooth Build Button, Part 1: project planning"
 date:   2019-02-26 21:42:00
 category: articles
 published: true
@@ -8,11 +8,11 @@ image:
   feature: button01/button-header.jpg
 ---
 
-## Introduction
+## Introduction 
 
 It's time for a new project! I've been starting projects and enjoying not finishing them, but I've been feeling the itch to carry something small and focused all the way through design, documentation, and delivery.
 
-## The Idea
+## The Idea 
 
 A few years ago I built a build [button](https://www.automationdirect.com/adc/shopping/catalog/pushbuttons_-z-_switches_-z-_indicators/22mm_metal/mushroom_pushbuttons_illuminated_-a-_non-illuminated/gcx1137) to run my tests -- a simple [Teensy](https://www.pjrc.com/teensy/teensy31.html) that connects as a HID keyboard and sends a key combo when the button is pushed. In IDEs, I bound the key combo to running tests, and in iTerm to send `rake spec \n` (not very flexible for moving between types of projects).
 <br>
@@ -52,3 +52,5 @@ That's it! Next post I'll dive into building the MVP:
 
 * Press the built-in button on the nrf52 and be able to trigger a bluetooth keyboard press
 * Wiring up the button, nrf52, battery, power switch
+
+[Bluetooth Build Button, Part 2: mvp](/articles/button-mvp)
