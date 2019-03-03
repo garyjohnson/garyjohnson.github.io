@@ -11,7 +11,7 @@ image:
 
 Well it didn't take much to get the [core idea](/articles/new-project) working.
 <br>
-<video class="video" controls="controls" name="mvp" src="../../images/button02/button-mvp.mp4"></video>
+<video class="video" controls="controls" name="mvp" src="../../images/button02/button-mvp.mp4" poster="../../images/button02/button-thumbnail.png" preload="auto"></video>
 <br>
 What you're seeing here is the [Adafruit Feather nrf52832](https://www.adafruit.com/product/3406) acting as a bluetooth keyboard, paired to my Macbook, and sending `CTRL+ALT+F12` when I push the giant red button (mostly because it's unlikely to be used by _anything_). It's powered by a 500mAh lipo battery and not wired to the Macbook at all.
 
