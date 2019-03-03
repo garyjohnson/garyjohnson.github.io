@@ -11,7 +11,7 @@ image:
 
 Well it didn't take much to get the [core idea](/articles/new-project) working.
 <br>
-<video controls="controls" width="600" height="337" name="mvp" src="../../images/button02/button-mvp.mp4"></video>
+<video class="video" controls="controls" name="mvp" src="../../images/button02/button-mvp.mp4"></video>
 <br>
 What you're seeing here is the [Adafruit Feather nrf52832](https://www.adafruit.com/product/3406) acting as a bluetooth keyboard, paired to my Macbook, and sending `CTRL+ALT+F12` when I push the giant red button (mostly because it's unlikely to be used by _anything_). It's powered by a 500mAh lipo battery and not wired to the Macbook at all.
 
@@ -82,6 +82,8 @@ I really wanted to avoid the Arduino IDE as much as possible -- I do a lot of my
 I started with [ino](https://github.com/amperka/ino), but unfortunately the last commit was in 2014 and it no longer functions with the latest version of Arduino IDE.
 
 Then I tried using the [arduino-cli](https://github.com/arduino/arduino-cli) to build a [Makefile (GitHub)](https://github.com/garyjohnson/build-button/blob/cf1c7cafbe215add65a0cb004e41e90da2040dd3/firmware/Makefile) but couldn't quite get it functioning with the Adafruit nrf52.
+
+Might come back and revisit this later, but for now I'm going to have to let this go.
 
 ## Next Steps
 
