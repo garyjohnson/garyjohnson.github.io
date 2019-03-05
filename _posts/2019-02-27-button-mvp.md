@@ -87,4 +87,4 @@ Might come back and revisit this later, but for now I'm going to have to let thi
 
 ## Next Steps
 
-It's time to design an enclosure!
+It's time to [design an enclosure](/articles/enclosure-rough-in)!
