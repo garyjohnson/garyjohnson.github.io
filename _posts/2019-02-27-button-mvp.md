@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Bluetooth Build Button, Part 2: the mvp"
+title:  "Bluetooth Build Button, Part 2: the proof-of-concept"
 date:   2019-02-27 7:59:00
 author: garyjohnson
 category: articles
