@@ -113,8 +113,10 @@ Okay, so we'll go model the smaller battery and start there. There's another iss
 
 Looks like we're going to need to [build a flat into our cyclinder](https://www.apple.com/mac-pro/).
 
+## Scope Creep
+
 Finally, the contact switch on the button really takes up a ton of good space -- this is something I'd like to address, but it works and building an alternative is going to distract us from delivering V1. Let's put it on our nice-to-haves list for now.
 
-# What's next 
+## What's next 
 
 With the rough-ins done, we managed to visualize some potential issues. We'll move to the smaller battery and then get to work on making a v1 enclosure we can 3D print and test out.
