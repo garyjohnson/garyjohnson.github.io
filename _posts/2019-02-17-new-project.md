@@ -40,9 +40,9 @@ There's a couple other things I'd like to tackle as part of this project, all of
 
 ## Next Steps
 
-That's it! Next post I'll dive into building the MVP:
+That's it! Next post I'll dive into building the proof-of-concept:
 
 * Press the built-in button on the nrf52 and be able to trigger a bluetooth keyboard press
 * Wiring up the button, nrf52, battery, power switch
 
-[Bluetooth Build Button, Part 2: mvp](/articles/button-mvp)
+[Bluetooth Build Button, Part 2: the proof-of-concept](/articles/button-mvp)
