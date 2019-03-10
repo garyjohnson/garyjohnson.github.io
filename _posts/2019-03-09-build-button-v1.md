@@ -41,7 +41,9 @@ Before we print, a quick fit check with all of our parts and rough-ins:
 
 ![assembled](../../images/button04/assembled.png)
 
-Let's print!
+Model is looking good. As a checkpoint, I'll get it out of Fusion 360 and into GitHub: [build-button (GitHub)](https://github.com/garyjohnson/build-button) 
+
+Now let's print!
 
 ## Printing
 
