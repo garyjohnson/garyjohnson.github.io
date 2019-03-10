@@ -19,7 +19,7 @@ Let's compare **direct** and **parametric** modeling software for a minute, beca
 
 A couple years back before I knew the difference, I was working in a **direct modeling** tool, the now-defunct [Autodesk 123D Design](https://www.autodesk.com/solutions/123d-apps) (which was a wonderful, simple, intuitive tool, but that's neither here nor there). I ended up designing the most complex model I've built yet -- an internet-connected, [Raspberry Pi](https://www.raspberrypi.org)-powered, touchscreen RGB lamp for an [Introduction to Connected Devices course at Case Western Reserve University](http://bulletin.case.edu/course-descriptions/eecs/). 
 
-It was completely tooless and featured an interlocking sliding-rail system for opening and closing, as well as mounting features for the hardware inside:
+It was pretty complex -- it was tooless and had an interlocking sliding-rail system for opening and closing, as well as mounting features for the hardware inside:
 
 ![lampi](../../images/button03/lampi.gif)
 
@@ -119,4 +119,4 @@ Finally, the contact switch on the button really takes up a ton of good space --
 
 ## What's next 
 
-With the rough-ins done, we managed to visualize some potential issues. We'll move to the smaller battery and then get to work on making a v1 enclosure we can 3D print and test out.
+With the rough-ins done, we managed to visualize some potential issues. We'll move to the smaller battery and then get to work on [making a v1 enclosure](/articles/build-button-v1) we can 3D print and test out.
