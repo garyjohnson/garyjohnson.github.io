@@ -6,7 +6,7 @@ author: garyjohnson
 category: articles
 published: true
 image:
-  feature: button04/header.png
+  feature: button04/header2.png
 ---
 
 With the [rough-ins in place](/articles/enclosure-rough-ins), we can build out the enclosure.
