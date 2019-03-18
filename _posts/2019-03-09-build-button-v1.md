@@ -86,4 +86,4 @@ Here are the things that bug me, in the order of most annoying:
 * Can't easily run the proper test suite in the command line.
 * Having to open the case to switch power.
 
-So next we'll start [tackling those issues (Part 5: the software)](/articles/the-software), and then we can move onto enhancing the button.
+So next we'll start [tackling those issues (Part 5: the software)](/articles/software), and then we can move onto enhancing the button.
