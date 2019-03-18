@@ -5,9 +5,10 @@ date:   2019-03-13 19:28:00
 author: garyjohnson
 category: articles
 published: true
+image:
+  feature: button05/header.jpg
 header:
-	image: button05/header.jpg
-	og_image: button05/robot-preview.png
+  og_image: button05/robot-preview.png
 ---
 
 Now that [v1.0 is out of the way (Part 4: v1.0 complete)](/articles/build-button-v1), we can spend some time using it day-to-day and build incremental improvements.
