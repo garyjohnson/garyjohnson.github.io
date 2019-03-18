@@ -134,7 +134,7 @@ Some things we haven't addressed yet:
 
 ## A diversion
 
-A welcome diversion from actual progress: during a hack night, a buddy was playing with a robot arm and we combined projects to create a robot that would perpetually run it's own program using the button:
+A welcome diversion from actual progress: during a hack night, [a buddy](http://www.datablue.net) was [playing with a robot arm](https://www.dobot.cc) and we combined projects to create a robot that would perpetually run it's own program using the button:
 
 <br>
 <video controls="controls" name="robot" src="../../images/button05/robot.mp4" poster="../../images/button05/robot-thumbnail.png" preload="auto"></video>
