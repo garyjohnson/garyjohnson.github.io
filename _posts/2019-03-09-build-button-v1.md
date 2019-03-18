@@ -9,7 +9,7 @@ image:
   feature: button04/header2.png
 ---
 
-With the [rough-ins in place](/articles/enclosure-rough-ins), we can build out the enclosure.
+With the [rough-ins in place (Part 3: the enclosure rough-ins)](/articles/enclosure-rough-ins), we can build out the enclosure.
 
 ## Battery
 
@@ -86,4 +86,4 @@ Here are the things that bug me, in the order of most annoying:
 * Can't easily run the proper test suite in the command line.
 * Having to open the case to switch power.
 
-So next we'll start tackling those issues, and then we can move onto enhancing the button.
+So next we'll start [tackling those issues (Part 5: the software)](/articles/the-software), and then we can move onto enhancing the button.

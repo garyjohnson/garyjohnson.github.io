@@ -9,7 +9,7 @@ image:
   feature: button02/header.jpg
 ---
 
-Well it didn't take much to get the [core idea](/articles/new-project) working.
+Well it didn't take much to get the [core idea (Part 1: new project)](/articles/new-project) working.
 <br>
 <video controls="controls" name="mvp" src="../../images/button02/button-mvp.mp4" poster="../../images/button02/button-thumbnail.png" preload="auto"></video>
 <br>
@@ -87,4 +87,4 @@ Might come back and revisit this later, but for now I'm going to have to let thi
 
 ## Next Steps
 
-It's time to [design an enclosure](/articles/enclosure-rough-ins/)!
+It's time to [design an enclosure (Part 3: enclosure rough-ins)](/articles/enclosure-rough-ins/)!

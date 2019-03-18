@@ -9,7 +9,7 @@ image:
   feature: button03/header.png
 ---
 
-With the [core idea now functional](/articles/button-mvp), it's time to start working on a proper enclosure.
+With the [core idea now functional (Part 2: the proof-of-concept)](/articles/button-mvp), it's time to start working on a proper enclosure.
 
 For building models, I've been using [Autodesk Fusion 360](https://www.autodesk.com/products/fusion-360/overview). It's a powerful parametric modeling tool and has [free non-commercial licensing](https://www.autodesk.com/campaigns/fusion-360-for-hobbyists). The license is only one year long, but can be renewed each year.
 
@@ -119,4 +119,4 @@ Finally, the contact switch on the button really takes up a ton of good space --
 
 ## What's next 
 
-With the rough-ins done, we managed to visualize some potential issues. We'll move to the smaller battery and then get to work on [making a v1 enclosure](/articles/build-button-v1) we can 3D print and test out.
+With the rough-ins done, we managed to visualize some potential issues. We'll move to the smaller battery and then get to work on [making a v1 enclosure (Part 4: v1.0 complete)](/articles/build-button-v1) we can 3D print and test out.
