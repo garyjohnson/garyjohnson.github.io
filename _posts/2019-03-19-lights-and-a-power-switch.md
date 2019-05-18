@@ -84,3 +84,5 @@ I've hit a blocker in continuing to build the software, which is that I can't se
 
 Solving those runtime crashes is threatening to kill my momentum, so it's priority number one.
 
+Next: [crashes and animations](/articles/crashes-and-animations)
+
