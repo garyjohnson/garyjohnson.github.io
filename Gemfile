@@ -7,3 +7,4 @@ gem 'octopress'
 gem 'kramdown'
 gem 'pygments.rb'
 gem "kramdown-parser-gfm"
+gem 'webrick'
