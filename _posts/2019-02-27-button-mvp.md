@@ -1,12 +1,12 @@
 ---
-layout: post
+layout: single
 title:  "Bluetooth Build Button, Part 2: the proof-of-concept"
 date:   2019-02-27 7:59:00
 author: garyjohnson
 category: articles
 published: true
-image:
-  feature: button02/header.jpg
+header:
+  image: /images/button02/header.jpg
 ---
 
 Well it didn't take much to get the [core idea (Part 1: new project)]({% post_url 2019-02-17-new-project %}) working.

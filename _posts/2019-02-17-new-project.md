@@ -1,12 +1,12 @@
 ---
-layout: post
+layout: single
 title:  "Bluetooth Build Button, Part 1: project planning"
 date:   2019-02-26 21:42:00
 author: garyjohnson
 category: articles
 published: true
-image:
-  feature: button01/button-header.jpg
+header:
+  image: /images/button01/button-header.jpg
 ---
 
 It's time for a new project! I've been starting projects and enjoying not finishing them, but I've been feeling the itch to carry something small and focused all the way through design, documentation, and delivery.

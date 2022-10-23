@@ -1,13 +1,12 @@
 ---
-layout: post
+layout: single
 title:  "Bluetooth Build Button, Part 7: crashes and animations"
 date:   2019-05-11 10:29:00
 author: garyjohnson
 category: articles
 published: true
-image:
-  feature: button07/cover.jpg
-  og_feature: button07/cover-preview.jpg
+header:
+  image: /images/button07/cover.jpg
 ---
 
 Previously, we [added LEDs for feedback (Part 6: lights and a power switch)]({% post_url 2019-03-19-lights-and-a-power-switch %}), and ended up with a number of problems to fix. The most blocking was an issue where making changes to the firmware started causing inexplicable crashes.

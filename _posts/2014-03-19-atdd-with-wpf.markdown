@@ -1,12 +1,12 @@
 ---
-layout: post
+layout: single
 title:  "ATDD with WPF"
 date:   2014-03-19 22:05:20
 category: articles
 published: false
 author: garyjohnson
-image:
-  feature: background-02.png
+header:
+  image: /images/background-02.png
 ---
 
 ## Introduction

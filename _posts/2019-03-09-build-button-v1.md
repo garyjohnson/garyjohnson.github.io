@@ -1,12 +1,12 @@
 ---
-layout: post
+layout: single
 title:  "Bluetooth Build Button, Part 4: v1.0 complete"
 date:   2019-03-09 19:57:00
 author: garyjohnson
 category: articles
 published: true
-image:
-  feature: button04/header2.png
+header:
+  image: /images/button04/header2.png
 ---
 
 With the [rough-ins in place (Part 3: the enclosure rough-ins)]({% post_url 2019-03-04-enclosure-rough-ins %}), we can build out the enclosure.

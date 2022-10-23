@@ -1,13 +1,12 @@
 ---
-layout: post
+layout: single
 title:  "Bluetooth Build Button, Part 6: lights and a power switch"
 date:   2019-03-19 10:29:00
 author: garyjohnson
 category: articles
 published: true
-image:
-  feature: button06/button-cover-top.jpg
-  og_feature: button06/button-cover.jpg
+header:
+  image: /images/button06/button-cover-top.jpg
 ---
 
 With [a basic software implementation completed (Part 5: the software)]({% post_url 2019-03-18-software %}), we can spend some time using it day-to-day and build incremental improvements.

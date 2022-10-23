@@ -1,12 +1,12 @@
 ---
-layout: post
+layout: single
 title:  "Bluetooth Build Button, Part 3: the enclosure rough-ins"
 date:   2019-03-04 10:36:00
 author: garyjohnson
 category: articles
 published: true
-image:
-  feature: button03/header.png
+header:
+  image: /images/button03/header.png
 ---
 
 With the [core idea now functional (Part 2: the proof-of-concept)]({% post_url 2019-02-27-button-mvp %}), it's time to start working on a proper enclosure.
