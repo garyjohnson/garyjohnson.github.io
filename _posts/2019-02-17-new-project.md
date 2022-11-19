@@ -7,6 +7,7 @@ category: articles
 published: true
 header:
   image: /images/button01/button-header.jpg
+category: "build button"
 ---
 
 It's time for a new project! I've been starting projects and enjoying not finishing them, but I've been feeling the itch to carry something small and focused all the way through design, documentation, and delivery.

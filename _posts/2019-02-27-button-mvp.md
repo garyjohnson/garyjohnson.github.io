@@ -7,6 +7,7 @@ category: articles
 published: true
 header:
   image: /images/button02/header.jpg
+category: "build button"
 ---
 
 Well it didn't take much to get the [core idea (Part 1: new project)]({% post_url 2019-02-17-new-project %}) working.

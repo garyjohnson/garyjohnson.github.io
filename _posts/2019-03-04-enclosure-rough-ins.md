@@ -7,6 +7,7 @@ category: articles
 published: true
 header:
   image: /images/button03/header.png
+category: "build button"
 ---
 
 With the [core idea now functional (Part 2: the proof-of-concept)]({% post_url 2019-02-27-button-mvp %}), it's time to start working on a proper enclosure.

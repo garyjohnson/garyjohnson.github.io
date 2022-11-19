@@ -7,6 +7,7 @@ category: articles
 published: true
 header:
   image: /images/button04/header2.png
+category: "build button"
 ---
 
 With the [rough-ins in place (Part 3: the enclosure rough-ins)]({% post_url 2019-03-04-enclosure-rough-ins %}), we can build out the enclosure.

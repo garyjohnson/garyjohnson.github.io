@@ -7,6 +7,7 @@ category: articles
 published: true
 header:
   image: /images/button07/cover.jpg
+category: "build button"
 ---
 
 Previously, we [added LEDs for feedback (Part 6: lights and a power switch)]({% post_url 2019-03-19-lights-and-a-power-switch %}), and ended up with a number of problems to fix. The most blocking was an issue where making changes to the firmware started causing inexplicable crashes.

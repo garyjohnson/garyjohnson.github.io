@@ -7,6 +7,7 @@ category: articles
 published: true
 header:
   image: /images/button06/button-cover-top.jpg
+category: "build button"
 ---
 
 With [a basic software implementation completed (Part 5: the software)]({% post_url 2019-03-18-software %}), we can spend some time using it day-to-day and build incremental improvements.
