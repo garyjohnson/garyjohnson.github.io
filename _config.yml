@@ -18,15 +18,19 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: Gary's WIP
+title: "Gary's Work in Progress"
 email: 
-description: >- # this means to ignore newlines until "baseurl:"
-  Keeping a log of unfinished projects, until the end of time
+description: "Keeping a log of unfinished projects, until the end of time"
 baseurl: "" # the subpath of your site, e.g. /blog
-url:              http://garyjohnson.github.io
-twitter_username: GaryGJohnson
-github_username:  garyjohnson
-repository: garyjohnson/garyjohnson.github.io
+url: "http://garyjohnson.github.io"
+github_username: "garyjohnson"
+repository: "garyjohnson/garyjohnson.github.io"
+
+author:
+  name: "Gary Johnson"
+  avatar: "/images/gary-small.jpg"
+  bio: ""
+  location: "Ohio"
 
 # Build settings
 remote_theme: "mmistakes/minimal-mistakes@4.24.0"
