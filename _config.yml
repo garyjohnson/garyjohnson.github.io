@@ -35,12 +35,12 @@ plugins:
   - jekyll-feed
   - jekyll-include-cache
 
-breadcrumbs: true
+    #breadcrumbs: true
 
 collections:
   projects:
     output: true
-    permalink: /:collection/:path/
+    permalink: /projects/:collection/:path/
 
 include: ["_pages"]
 
@@ -78,7 +78,7 @@ defaults:
       related: true
       category: projects
       author: garyjohnson
-      permalink: /projects/:categories/:title/
+      permalink: /projects/:collection/:title/
   - scope:
       path: ""
       type: pages
