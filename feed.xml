@@ -1,0 +1,596 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.2">Jekyll</generator><link href="http://garyjohnson.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="http://garyjohnson.github.io/" rel="alternate" type="text/html" /><updated>2022-11-20T05:03:28+00:00</updated><id>http://garyjohnson.github.io/feed.xml</id><title type="html">Gary’s Work in Progress</title><subtitle>Keeping a log of unfinished projects, until the end of time</subtitle><author><name>Gary Johnson</name></author><entry><title type="html">Bluetooth Build Button, Part 7: crashes and animations</title><link href="http://garyjohnson.github.io/projects/posts/crashes-and-animations/" rel="alternate" type="text/html" title="Bluetooth Build Button, Part 7: crashes and animations" /><published>2019-05-11T10:29:00+00:00</published><updated>2019-05-11T10:29:00+00:00</updated><id>http://garyjohnson.github.io/projects/posts/crashes-and-animations</id><content type="html" xml:base="http://garyjohnson.github.io/projects/posts/crashes-and-animations/">&lt;p&gt;Previously, we &lt;a href=&quot;/projects/posts/lights-and-a-power-switch/&quot;&gt;added LEDs for feedback (Part 6: lights and a power switch)&lt;/a&gt;, and ended up with a number of problems to fix. The most blocking was an issue where making changes to the firmware started causing inexplicable crashes.&lt;/p&gt;
+
+&lt;h2 id=&quot;crashes&quot;&gt;Crashes&lt;/h2&gt;
+
+&lt;p&gt;While working on animation code, I ran into an issue with the firmware where adding doing seemingly trivial things in the code (declaring new unused variables or adding empty methods to a class for example) would compile but result in completely non-functional firmware. After flashing the firmware, the board LED would blink red a couple times and then become unresponsive.&lt;/p&gt;
+
+&lt;p&gt;I took a couple troubleshooting steps: could I be out of memory? Checked the global memory usage output by the compiler and also at runtime (with a functioning version of the firmware) and there appeared to be pleny of free memory.&lt;/p&gt;
+
+&lt;p&gt;A friend suggested the possibility of defective hardware (a bad block in memory where the firmware is stored, maybe), but I had some extra, identical boards to test on and they had the same issue.&lt;/p&gt;
+
+&lt;p&gt;Another possibility could be something in the toolchain, but debugging that felt like a total rabbit hole.&lt;/p&gt;
+
+&lt;p&gt;My next step was going to be ordering a &lt;a href=&quot;https://www.adafruit.com/product/3571&quot;&gt;JTAG debugger&lt;/a&gt; and seeing if I could at least sniff out some more detailed error info and enable better debugging. However, at some point in this process Adafruit released a new version (0.10.1) of &lt;a href=&quot;https://github.com/adafruit/Adafruit_nRF52_Arduino/releases&quot;&gt;Adafruit_nRF52_Arduino&lt;/a&gt;, which (I think) is the toolchain, bootloader, and libraries that enable programming the Feather from the Arduino IDE. After upgrading, all my issues dissapeared. I’m not sure what exactly was broken, but I’ll take it as a lucky win.&lt;/p&gt;
+
+&lt;p&gt;Onward, to animations.&lt;/p&gt;
+
+&lt;h2 id=&quot;animations&quot;&gt;Animations&lt;/h2&gt;
+
+&lt;p&gt;One problem encountered during use is feedback – once I release the button, the LEDs turn off immediately. It can be a little confusing to know what stage I just triggered (run test, run file, run all tests), but mostly it’s just unsatisfying.
+&lt;br /&gt;&lt;/p&gt;
+&lt;video controls=&quot;controls&quot; name=&quot;no-feedback&quot; src=&quot;/images/button07/no-feedback.mp4&quot; poster=&quot;/images/button07/no-feedback-thumbnail.jpg&quot; preload=&quot;auto&quot;&gt;&lt;/video&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;an-end-to-delays&quot;&gt;An End to Delays&lt;/h3&gt;
+
+&lt;p&gt;There’s a couple ways to approach building a feedback animation. It’s pretty common when starting with programming micros like an Arduino to encounter code like this:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-cpp&quot; data-lang=&quot;cpp&quot;&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;loop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;digitalWrite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LED_BUILTIN&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HIGH&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;   &lt;span class=&quot;c1&quot;&gt;// turn the LED on (HIGH is the voltage level)&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;delay&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;                       &lt;span class=&quot;c1&quot;&gt;// wait for a second&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;digitalWrite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LED_BUILTIN&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LOW&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;    &lt;span class=&quot;c1&quot;&gt;// turn the LED off by making the voltage LOW&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;delay&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;                       &lt;span class=&quot;c1&quot;&gt;// wait for a second&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;…in fact, this is from the Arduino built-in examples. And it’s a fine approach if all you’re doing is blinking an LED. What happens if you want to check for a button press?&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-cpp&quot; data-lang=&quot;cpp&quot;&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;loop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;digitalWrite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LED_BUILTIN&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HIGH&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;   &lt;span class=&quot;c1&quot;&gt;// turn the LED on (HIGH is the voltage level)&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;delay&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;                       &lt;span class=&quot;c1&quot;&gt;// wait for a second&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;digitalWrite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LED_BUILTIN&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LOW&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;    &lt;span class=&quot;c1&quot;&gt;// turn the LED off by making the voltage LOW&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;delay&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;                       &lt;span class=&quot;c1&quot;&gt;// wait for a second&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;digitalRead&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;BUTTON&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HIGH&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// do stuff&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;If you briefly press the button here, there’s a high chance it won’t work – to be 100% sure you’ll trigger your button handler, you’d have to hold the button down for &amp;gt; 2 seconds.&lt;/p&gt;
+
+&lt;p&gt;Rather than programatically defining our animation using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;delay&lt;/code&gt; to guarantee timing, let’s &lt;em&gt;calculate&lt;/em&gt; our animation state at any given time:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-cpp&quot; data-lang=&quot;cpp&quot;&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;blinkDuration&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;long&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;previousMillis&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;long&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;currentMillis&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;loop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;currentMillis&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;millis&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+  &lt;span class=&quot;c1&quot;&gt;// current time divided by the duration of a blink (on or off) will&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// give us a &quot;count&quot; of how many animation phases have happened&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// ex: 3400 millis / 1000 blink phase = 3 phases&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;long&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;blinkPhase&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;currentMillis&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;blinkDuration&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;blinkPhase&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// odd phase, light off&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;digitalWrite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LED_BUILTIN&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LOW&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// even phase, light on&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;digitalWrite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LED_BUILTIN&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HIGH&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;digitalRead&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;BUTTON&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HIGH&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// do stuff&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;previousMillis&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;currentMillis&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Look! No delays. A couple notes on how that example isn’t perfect:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;because we don’t use the remainder of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;currentMillis / blinkDuration&lt;/code&gt;, there’s a very slight delay to the animation on start.&lt;/li&gt;
+  &lt;li&gt;At some point &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;millis()&lt;/code&gt; will reach the max value that can fit in an &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;unsigned long&lt;/code&gt; and rollover to zero – we may see a hitch in the animation during that time (two seconds of being lit up, or two seconds of being off).&lt;/li&gt;
+  &lt;li&gt;We rely on the simplicity of the animation being a two-state – what if we want to fade the LEDs in and out or have multiple states?&lt;/li&gt;
+  &lt;li&gt;The blinking always happens – what if we want to trigger the blinking on button press, for a certain amount of time? What if we want to be able to interrupt it?&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;For a better and more detailed tutorial along these same lines, check out &lt;a href=&quot;https://learn.adafruit.com/multi-tasking-the-arduino-part-1/overview&quot;&gt;Adafruit’s ‘multi-tasking the arduino’&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;feedback-animation&quot;&gt;Feedback Animation&lt;/h2&gt;
+
+&lt;p&gt;It’s with that approach in mind that I tackled feedback animations: &lt;a href=&quot;https://github.com/garyjohnson/build-button/blob/f2ebf5d35bc040f05dc32b6827a9f14501823eb3/firmware/build-button/LedApp.cpp#L41-L59&quot;&gt;LedApp.cpp&lt;/a&gt;.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-cpp&quot; data-lang=&quot;cpp&quot;&gt;&lt;span class=&quot;n&quot;&gt;pixels&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;setBrightness&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;animationDuration&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;divisor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;125.0&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;130.0&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The real key in there is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sin()&lt;/code&gt; – we’re using a sine function to ramp the brightness of the LEDs up and down in a smooth “blinking” fashion. The rest of the math is there to a) ensure the blinking is the right speed and b) ensure that the animation starts on the peak of the sine wave (we want to start the animation at full brightness, so that it appears to transition smoothly from the pushed state).&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;video controls=&quot;controls&quot; name=&quot;animation&quot; src=&quot;/images/button07/animation.mp4&quot; poster=&quot;/images/button07/animation-thumbnail.jpg&quot; preload=&quot;auto&quot;&gt;&lt;/video&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;whats-next&quot;&gt;What’s Next&lt;/h2&gt;
+
+&lt;p&gt;Every day I need to charge the button even when powered off – it’s time to rework the power switch. Also, the lid not “locking” into place is troublesome – it pops off frequently.&lt;/p&gt;</content><author><name>garyjohnson</name></author><category term="build button" /><summary type="html">Previously, we added LEDs for feedback (Part 6: lights and a power switch), and ended up with a number of problems to fix. The most blocking was an issue where making changes to the firmware started causing inexplicable crashes.</summary></entry><entry><title type="html">Bluetooth Build Button, Part 6: lights and a power switch</title><link href="http://garyjohnson.github.io/projects/posts/lights-and-a-power-switch/" rel="alternate" type="text/html" title="Bluetooth Build Button, Part 6: lights and a power switch" /><published>2019-03-19T10:29:00+00:00</published><updated>2019-03-19T10:29:00+00:00</updated><id>http://garyjohnson.github.io/projects/posts/lights-and-a-power-switch</id><content type="html" xml:base="http://garyjohnson.github.io/projects/posts/lights-and-a-power-switch/">&lt;p&gt;With &lt;a href=&quot;/projects/posts/software/&quot;&gt;a basic software implementation completed (Part 5: the software)&lt;/a&gt;, we can spend some time using it day-to-day and build incremental improvements.&lt;/p&gt;
+
+&lt;h2 id=&quot;power-switch&quot;&gt;Power switch&lt;/h2&gt;
+
+&lt;p&gt;I mentioned previously that I was opening the enclosure to turn the button on and off, so streamlining that behavior is my first target.&lt;/p&gt;
+
+&lt;p&gt;A little bit of time in Fusion 360, and I have a mount for the power switch. It’s meant to be a bit of a tight fit, as the switch should hopefully “snap” into the enclosure.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button06/switch-model.gif&quot; alt=&quot;mount for switch&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The first print ended up being way too tight, so after destroying it with pliers, it’s back to Fusion for a few tweaks, and finally I have something that works:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button06/switch-inside.jpg&quot; alt=&quot;switch inside&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button06/switch-outside.jpg&quot; alt=&quot;switch outside&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;It’s connected to &lt;a href=&quot;https://learn.adafruit.com/assets/43921&quot;&gt;VREG ENABLE (labelled ‘EN’) on the Feather&lt;/a&gt; – which will prevent the Feather from getting 3.3V from the battery.&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;video controls=&quot;controls&quot; name=&quot;switch&quot; src=&quot;/images/button06/switch.mp4&quot; poster=&quot;/images/button06/switch-thumbnail.jpg&quot; preload=&quot;auto&quot;&gt;&lt;/video&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;After a little bit of use, it seems to work well! I still haven’t done any real math to figure out battery life, but switching it on during the work day and off at night has allowed me to use it for days without needing a charge.&lt;/p&gt;
+
+&lt;h2 id=&quot;led-ring&quot;&gt;LED ring&lt;/h2&gt;
+
+&lt;p&gt;Previously, I created handling for three stages of button push – short, medium, long. In vim-test, respectively, those run a single test, the test file, and the entire test suite. But there’s no feedback to let you know how long to press or what stage you’re running.&lt;/p&gt;
+
+&lt;p&gt;Given the cylindrical enclosure, I really liked the idea of including a &lt;a href=&quot;https://www.adafruit.com/product/1586&quot;&gt;NeoPixel ring&lt;/a&gt; and using it as a feedback mechanism, but I wasn’t 100% sure that I could build something effective. Remembering the sketch from the &lt;a href=&quot;/articles/new-project&quot;&gt;first post&lt;/a&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button06/button-io.jpg&quot; alt=&quot;button io&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I started by building the interaction with all the components on a breadboard:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button06/led-breadboard.jpg&quot; alt=&quot;led ring on breadboard&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;And then get to work on creating a lid that can house the LED ring. This ends up being slightly tricky because the NeoPixel ring has GND + VIN on one side of the ring, and the data bus on the opposite side, so we need channels for wires to run on both sides of the lid:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button06/led-lid.gif&quot; alt=&quot;lid for led ring&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Thankfully it fits pretty good on the first print.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button06/led-in-lid.jpg&quot; alt=&quot;printed lid&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The interation works pretty well – the ring cycles through blue, purple, and then red. Releasing on any of those stages triggers the appropriate test run.
+&lt;br /&gt;&lt;/p&gt;
+&lt;video controls=&quot;controls&quot; name=&quot;leds bright&quot; src=&quot;/images/button06/leds-bright.mp4&quot; poster=&quot;/images/button06/leds-bright-thumbnail.jpg&quot; preload=&quot;auto&quot;&gt;&lt;/video&gt;
+&lt;p&gt;&lt;br /&gt;
+It’s very bright though, so back to Fusion 360 to create a quick diffuser ring to snap over the LEDs.
+&lt;br /&gt;&lt;/p&gt;
+&lt;video controls=&quot;controls&quot; name=&quot;leds diffuser&quot; src=&quot;/images/button06/led-diffuser.mp4&quot; poster=&quot;/images/button06/led-diffuser-thumbnail.jpg&quot; preload=&quot;auto&quot;&gt;&lt;/video&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;three-problems-to-solve&quot;&gt;Three problems to solve&lt;/h2&gt;
+
+&lt;p&gt;The LED feedback has been working great so far. But after about a week of use I can identify three problems:&lt;/p&gt;
+
+&lt;h3 id=&quot;feedback&quot;&gt;Feedback&lt;/h3&gt;
+
+&lt;p&gt;When I tap the button quickly, the LEDs just turn off. It’d be great if there was some confirmation feedback to communicate which stage I triggered (blinking the LEDs in blue, purple or red).&lt;/p&gt;
+
+&lt;h3 id=&quot;battery-life&quot;&gt;Battery life&lt;/h3&gt;
+
+&lt;p&gt;The power switch isn’t a hard cut to the battery line – the EN pin just disables the 3.3v regulator for the Feather. This means that the NeoPixels continue to draw power even when they are not lit up, and suddenly I’ve gone from having week-long battery life to needing a charge every day. I’m probably going to want to build a carrier board for the feather to enable a proper off switch.&lt;/p&gt;
+
+&lt;h3 id=&quot;mysterious-crashes&quot;&gt;Mysterious crashes&lt;/h3&gt;
+
+&lt;p&gt;I’ve hit a blocker in continuing to build the software, which is that I can’t seem to change the code in even mundane ways without causing runtime errors I can’t debug. In this state, the code compiles, it appears I have pleny of memory, but the Feather just doesn’t seem to run. Without a JTAG debugger I’m flying blind here, but I’m going to have to figure out how to solve this if I want to move forward.&lt;/p&gt;
+
+&lt;h2 id=&quot;whats-next&quot;&gt;What’s next&lt;/h2&gt;
+
+&lt;p&gt;Solving those runtime crashes is threatening to kill my momentum, so it’s priority number one.&lt;/p&gt;
+
+&lt;p&gt;Next: &lt;a href=&quot;/projects/posts/crashes-and-animations/&quot;&gt;crashes and animations&lt;/a&gt;&lt;/p&gt;</content><author><name>garyjohnson</name></author><category term="build button" /><summary type="html">With a basic software implementation completed (Part 5: the software), we can spend some time using it day-to-day and build incremental improvements.</summary></entry><entry><title type="html">Bluetooth Build Button, Part 5: the software</title><link href="http://garyjohnson.github.io/projects/posts/software/" rel="alternate" type="text/html" title="Bluetooth Build Button, Part 5: the software" /><published>2019-03-18T10:29:00+00:00</published><updated>2019-03-18T10:29:00+00:00</updated><id>http://garyjohnson.github.io/projects/posts/software</id><content type="html" xml:base="http://garyjohnson.github.io/projects/posts/software/">&lt;p&gt;Now that &lt;a href=&quot;/projects/posts/build-button-v1/&quot;&gt;v1.0 is out of the way (Part 4: v1.0 complete)&lt;/a&gt;, we can spend some time using it day-to-day and build incremental improvements.&lt;/p&gt;
+
+&lt;h2 id=&quot;goals&quot;&gt;Goals&lt;/h2&gt;
+
+&lt;p&gt;I’ve made it through a week with the build button as a daily driver of launching tests, and it works great! The battery life is surprisingly sufficient and has lasted over several workdays without a charge.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button05/daily-driver.jpg&quot; alt=&quot;workstation&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;However, there are two issues I’m hoping to address via software.&lt;/p&gt;
+
+&lt;p&gt;The first is that the button indiscriminately enters &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rake spec/n&lt;/code&gt; when pressed via an iTerm binding. Even though I’ve been doing a lot of work in Rails projects, I also work in projects that are node.js or even Rails + webpacker, where I need to run test suites for both Ruby and Javascript. We simply need a better way to be smart about what gets run.&lt;/p&gt;
+
+&lt;p&gt;The second is that inside of Vim, there are multiple contexts I may want to trigger for test run – run the current spec, run all the specs in the current file, or run the entire test suite. I’ve been using the button to run the current spec, and falling back to key commands to execute the other cases. I want the button to handle all of this!&lt;/p&gt;
+
+&lt;h2 id=&quot;bash&quot;&gt;Bash&lt;/h2&gt;
+
+&lt;p&gt;I know that the iTerm binding is too removed from the execution context to remain. Defining this as a key binding in iTerm means that it enters this text whether I’m in vim or a bash prompt or anywhere else. So let’s delete it:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button05/iterm-binding.png&quot; alt=&quot;iterm binding&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Something that occurred to me is that being smart about the project and what test suite to run is &lt;em&gt;really hard&lt;/em&gt;, if not impossible to get right. Instead, let’s start by making this purely customizable and expanding to be smart only if we must.&lt;/p&gt;
+
+&lt;p&gt;The simple idea is, let’s create a &lt;a href=&quot;https://wiki.archlinux.org/index.php/Dotfiles&quot;&gt;dotfile&lt;/a&gt; per project directory that contains the command we want to run. &lt;em&gt;Then&lt;/em&gt; we can build a launcher that will run what’s in the dotfile, &lt;em&gt;then&lt;/em&gt; we can bind to the launcher.&lt;/p&gt;
+
+&lt;p&gt;So, an example of the dotfile (I called it &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.button&lt;/code&gt;):&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-console&quot; data-lang=&quot;console&quot;&gt;&lt;span class=&quot;gp&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;Contents of .button:
+&lt;span class=&quot;go&quot;&gt;rake spec&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;And our &lt;a href=&quot;https://github.com/garyjohnson/build-button/blob/master/button-launcher/button-launcher&quot;&gt;button-launcher script&lt;/a&gt;, written entirely in shell script. How easy was &lt;em&gt;that&lt;/em&gt;?&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;c&quot;&gt;#!/bin/bash&lt;/span&gt;
+
+&lt;span class=&quot;nv&quot;&gt;FILE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'.button'&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-f&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$FILE&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;then
+  while &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;read &lt;/span&gt;p&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do
+    &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;eval&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$p&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;done&lt;/span&gt; &amp;lt; &lt;span class=&quot;nv&quot;&gt;$FILE&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;else
+  &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;No .button file found in current directory!&quot;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;fi&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;We can symlink it into our path at &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/usr/local/bin/&lt;/code&gt;:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;sudo ln&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-s&lt;/span&gt; &amp;lt;full path&amp;gt;/button-launcher /usr/local/bin/button-launcher&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;As it turns out, bash has a &lt;a href=&quot;https://stackoverflow.com/questions/4200800/in-bash-how-do-i-bind-a-function-key-to-a-command&quot;&gt;builtin &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bind&lt;/code&gt; command&lt;/a&gt; that will at least let us keep it in the shell and out of vim. Thinking ahead to broader compatibility a little, I also checked &lt;a href=&quot;https://fishshell.com/docs/current/commands.html#bind&quot;&gt;other shells&lt;/a&gt; to make sure they had some equivalent command.&lt;/p&gt;
+
+&lt;p&gt;So, in our &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.bash-profile&lt;/code&gt;:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;bind&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-x&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&quot;\e6&quot;:&quot;button-launcher&quot;'&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;You’ll notice we changed the keybinding. As it turns out, it’s a little challenging to find an available keybinding that works in terminal and vim and doesn’t overlap with anything else. In this case, we’ve moved to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CTRL+ALT+6&lt;/code&gt;, and shortly will also use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CTRL+ALT+7&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CTRL+ALT+8&lt;/code&gt; for other commands.&lt;/p&gt;
+
+&lt;h2 id=&quot;vim-test&quot;&gt;vim-test&lt;/h2&gt;
+
+&lt;p&gt;Inside of Vim / NeoVim, I use &lt;a href=&quot;https://github.com/janko/vim-test&quot;&gt;vim-test&lt;/a&gt; to launch my tests, which does a nice job of being context aware.&lt;/p&gt;
+
+&lt;p&gt;Let’s start by binding the button to run the test nearest to the cursor. In &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;~/.vimrc&lt;/code&gt;:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-console&quot; data-lang=&quot;console&quot;&gt;&lt;span class=&quot;gp&quot;&gt;nmap &amp;lt;silent&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&amp;lt;M-6&amp;gt; :TestNearest&amp;lt;CR&amp;gt; &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;extra-contexts&quot;&gt;Extra contexts&lt;/h2&gt;
+
+&lt;p&gt;Okay! Now the button runs whatever command I want in bash, and still launches the nearest test in vim-test. Let’s add some additional contexts.&lt;/p&gt;
+
+&lt;p&gt;My thought is to be able to hold the button just a little longer to increase the scope of the tests you run. So, quick push is current test, 1s hold is current file, 2s hold is test suite (for example).&lt;/p&gt;
+
+&lt;p&gt;In our &lt;a href=&quot;https://github.com/garyjohnson/build-button/blob/master/firmware/build-button/build-button.ino#L36&quot;&gt;firmware&lt;/a&gt;:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-cpp&quot; data-lang=&quot;cpp&quot;&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;onButtonRelease&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;long&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;holdDuration&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;long&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stageLength&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1000000&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;holdDuration&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stageLength&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;bleKeyboard&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendStage1Key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;holdDuration&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stageLength&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;bleKeyboard&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendStage2Key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;bleKeyboard&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendStage3Key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;These &lt;a href=&quot;https://github.com/garyjohnson/build-button/blob/971584ccf41935df530c323840ae0f39e155f7b9/firmware/build-button/BleKeyboardApp.cpp#L14-L27&quot;&gt;will trigger&lt;/a&gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CTRL+ALT=6&lt;/code&gt; through &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;8&lt;/code&gt;, respectively.&lt;/p&gt;
+
+&lt;p&gt;Let’s wire these up in our &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.vimrc&lt;/code&gt;:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-console&quot; data-lang=&quot;console&quot;&gt;&lt;span class=&quot;gp&quot;&gt;nmap &amp;lt;silent&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&amp;lt;M-6&amp;gt; :TestNearest&amp;lt;CR&amp;gt; 
+&lt;span class=&quot;gp&quot;&gt;nmap &amp;lt;silent&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&amp;lt;M-7&amp;gt; :TestFile&amp;lt;CR&amp;gt;
+&lt;span class=&quot;gp&quot;&gt;nmap &amp;lt;silent&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&amp;lt;M-8&amp;gt; :TestSuite&amp;lt;CR&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;For now, let’s make sure in the shell that no matter how long we hold the button for, it fires our launcher:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-console&quot; data-lang=&quot;console&quot;&gt;&lt;span class=&quot;go&quot;&gt;bind -x '&quot;\e6&quot;:&quot;button-launcher&quot;'
+bind -x '&quot;\e7&quot;:&quot;button-launcher&quot;'
+bind -x '&quot;\e8&quot;:&quot;button-launcher&quot;'&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Now we can fire off different scopes of test runs, although we have &lt;em&gt;no feedback&lt;/em&gt; as to how long we need to hold the button. I think we can start looking forward to using the NeoPixel ring as a feedback mechanism.&lt;/p&gt;
+
+&lt;h2 id=&quot;scope-creep&quot;&gt;Scope Creep&lt;/h2&gt;
+
+&lt;p&gt;Some things we haven’t addressed yet:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;There’s no feedback mechanism for how long the button is pressed.&lt;/li&gt;
+  &lt;li&gt;Our software solution is very focused on bash / vim in macOS. We have little clue how this will work in other environments.&lt;/li&gt;
+  &lt;li&gt;Setting up the software side of things is very manual and not packaged nicely.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;a-diversion&quot;&gt;A diversion&lt;/h2&gt;
+
+&lt;p&gt;A welcome diversion from actual progress: during a hack night, &lt;a href=&quot;http://www.datablue.net&quot;&gt;a buddy&lt;/a&gt; was &lt;a href=&quot;https://www.dobot.cc&quot;&gt;playing with a robot arm&lt;/a&gt; and we combined projects to create a robot that would perpetually run it’s own program using the button:&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;video controls=&quot;controls&quot; name=&quot;robot&quot; src=&quot;/images/button05/robot.mp4&quot; poster=&quot;/images/button05/robot-thumbnail.png&quot; preload=&quot;auto&quot;&gt;&lt;/video&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;whats-next&quot;&gt;What’s next&lt;/h2&gt;
+
+&lt;p&gt;Every day I’m opening the button up to toggle the power switch, so it’s now my #1 priority to get that accessible on the outside of the button. Next: &lt;a href=&quot;/projects/posts/lights-and-a-power-switch/&quot;&gt;lights and a power switch&lt;/a&gt;&lt;/p&gt;</content><author><name>garyjohnson</name></author><category term="build button" /><summary type="html">Now that v1.0 is out of the way (Part 4: v1.0 complete), we can spend some time using it day-to-day and build incremental improvements.</summary></entry><entry><title type="html">Bluetooth Build Button, Part 4: v1.0 complete</title><link href="http://garyjohnson.github.io/projects/posts/build-button-v1/" rel="alternate" type="text/html" title="Bluetooth Build Button, Part 4: v1.0 complete" /><published>2019-03-09T19:57:00+00:00</published><updated>2019-03-09T19:57:00+00:00</updated><id>http://garyjohnson.github.io/projects/posts/build-button-v1</id><content type="html" xml:base="http://garyjohnson.github.io/projects/posts/build-button-v1/">&lt;p&gt;With the &lt;a href=&quot;/projects/posts/enclosure-rough-ins/&quot;&gt;rough-ins in place (Part 3: the enclosure rough-ins)&lt;/a&gt;, we can build out the enclosure.&lt;/p&gt;
+
+&lt;h2 id=&quot;battery&quot;&gt;Battery&lt;/h2&gt;
+
+&lt;p&gt;After seeing that the 2000mAh battery wasn’t going to fit, I moved to modeling the 500mAh one and tucked it under the Feather:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button04/battery.png&quot; alt=&quot;battery&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Eventually I’d like everything to snap in without screws or hardware, but snaps take some modeling work and iteration – screw holes take about three seconds, so in they go.&lt;/p&gt;
+
+&lt;h2 id=&quot;flat-for-ports&quot;&gt;Flat for ports&lt;/h2&gt;
+
+&lt;p&gt;We need a flat surface for our USB port and switch, so once the position of the Feather is determined, we can build a sketch and cut out a flat.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button04/flat.png&quot; alt=&quot;flat&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button04/flat2.png&quot; alt=&quot;flat&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;And with that, we have the base of our enclosure:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button04/enclosure.gif&quot; alt=&quot;enclosure&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;lid&quot;&gt;Lid&lt;/h2&gt;
+
+&lt;p&gt;The lid is really just a couple of concentric circles extruded to different lengths, and takes about a minute to rough out.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button04/lid.png&quot; alt=&quot;lid&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Before we print, a quick fit check with all of our parts and rough-ins:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button04/assembled.png&quot; alt=&quot;assembled&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Model is looking good. As a checkpoint, I’ll get it out of Fusion 360 and into GitHub: &lt;a href=&quot;https://github.com/garyjohnson/build-button&quot;&gt;build-button (GitHub)&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Now let’s print!&lt;/p&gt;
+
+&lt;h2 id=&quot;printing&quot;&gt;Printing&lt;/h2&gt;
+
+&lt;p&gt;I picked up some silver Hatchbox PLA for button printing. The silver should look nice with the red button.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button04/silver-pla.jpg&quot; alt=&quot;hatchbox pla&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;An hour or two later and we’ve got a button!&lt;/p&gt;
+
+&lt;video controls=&quot;controls&quot; name=&quot;print&quot; src=&quot;/images/button04/print.mp4&quot; poster=&quot;/images/button04/preview.png&quot; preload=&quot;auto&quot;&gt;&lt;/video&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;Mounting the switch will take a little bit more work, and there’s plenty learn without it, so for now I’ve just wired it internally.&lt;/p&gt;
+
+&lt;p&gt;Because there are loose elements that may cause shorts, I’ve covered up the Feather with kapton tape as an insulator.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button04/switch.jpg&quot; alt=&quot;switch&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Looks like the micro USB port lines up pretty good!&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button04/usb-lineup.jpg&quot; alt=&quot;usb lineup&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Here’s our v1 build button. The print quality isn’t great, the lid fits way too tight, but things look pretty okay when it’s all assembled!&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button04/final-button.jpg&quot; alt=&quot;final button&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button04/final-button-back.jpg&quot; alt=&quot;final button back&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Still feels pretty cool to be able to do this wirelessly:&lt;/p&gt;
+
+&lt;video controls=&quot;controls&quot; name=&quot;v1&quot; src=&quot;/images/button04/v1.mp4&quot; poster=&quot;/images/button04/v1-preview.png&quot; preload=&quot;auto&quot;&gt;&lt;/video&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;whats-next&quot;&gt;Whats next&lt;/h2&gt;
+
+&lt;p&gt;We’ve finished implementing the core idea, but there’s a lot more finishing work that can go into this.&lt;/p&gt;
+
+&lt;p&gt;Here are the things that bug me, in the order of most annoying:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Can’t easily run the proper test suite in the command line.&lt;/li&gt;
+  &lt;li&gt;Having to open the case to switch power.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;So next we’ll start &lt;a href=&quot;/projects/posts/software/&quot;&gt;tackling those issues (Part 5: the software)&lt;/a&gt;, and then we can move onto enhancing the button.&lt;/p&gt;</content><author><name>garyjohnson</name></author><category term="build button" /><summary type="html">With the rough-ins in place (Part 3: the enclosure rough-ins), we can build out the enclosure.</summary></entry><entry><title type="html">Bluetooth Build Button, Part 3: the enclosure rough-ins</title><link href="http://garyjohnson.github.io/projects/posts/enclosure-rough-ins/" rel="alternate" type="text/html" title="Bluetooth Build Button, Part 3: the enclosure rough-ins" /><published>2019-03-04T10:36:00+00:00</published><updated>2019-03-04T10:36:00+00:00</updated><id>http://garyjohnson.github.io/projects/posts/enclosure-rough-ins</id><content type="html" xml:base="http://garyjohnson.github.io/projects/posts/enclosure-rough-ins/">&lt;p&gt;With the &lt;a href=&quot;/projects/posts/button-mvp/&quot;&gt;core idea now functional (Part 2: the proof-of-concept)&lt;/a&gt;, it’s time to start working on a proper enclosure.&lt;/p&gt;
+
+&lt;p&gt;For building models, I’ve been using &lt;a href=&quot;https://www.autodesk.com/products/fusion-360/overview&quot;&gt;Autodesk Fusion 360&lt;/a&gt;. It’s a powerful parametric modeling tool and has &lt;a href=&quot;https://www.autodesk.com/campaigns/fusion-360-for-hobbyists&quot;&gt;free non-commercial licensing&lt;/a&gt;. The license is only one year long, but can be renewed each year.&lt;/p&gt;
+
+&lt;h2 id=&quot;what-is-parametric-modeling&quot;&gt;What is parametric modeling?&lt;/h2&gt;
+
+&lt;p&gt;Let’s compare &lt;strong&gt;direct&lt;/strong&gt; and &lt;strong&gt;parametric&lt;/strong&gt; modeling software for a minute, because the distinction is important.&lt;/p&gt;
+
+&lt;p&gt;A couple years back before I knew the difference, I was working in a &lt;strong&gt;direct modeling&lt;/strong&gt; tool, the now-defunct &lt;a href=&quot;https://www.autodesk.com/solutions/123d-apps&quot;&gt;Autodesk 123D Design&lt;/a&gt; (which was a wonderful, simple, intuitive tool, but that’s neither here nor there). I ended up designing the most complex model I’ve built yet – an internet-connected, &lt;a href=&quot;https://www.raspberrypi.org&quot;&gt;Raspberry Pi&lt;/a&gt;-powered, touchscreen RGB lamp for an &lt;a href=&quot;http://bulletin.case.edu/course-descriptions/eecs/&quot;&gt;Introduction to Connected Devices course at Case Western Reserve University&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;It was pretty complex – it was tooless and had an interlocking sliding-rail system for opening and closing, as well as mounting features for the hardware inside:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button03/lampi.gif&quot; alt=&quot;lampi&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;With &lt;strong&gt;direct modeling&lt;/strong&gt;, you’ve got the model you’re working on and … that’s it. If you realize you need to change something simple, shave a millimeter here or there, you’ll probably be fine. If you need to go back and change something fundamental, something that &lt;em&gt;other&lt;/em&gt; features of the model are built upon, you’ll need to go back to an older version of the file (you &lt;em&gt;did&lt;/em&gt; put the file in version control, right?), make the change, and then &lt;em&gt;manually redo&lt;/em&gt; any work that came afterwards – this could be hours of work, and the chance of error is pretty huge.&lt;/p&gt;
+
+&lt;p&gt;As you can imagine, this became &lt;em&gt;quickly&lt;/em&gt; untenable for changes of any appreciable size. It was pretty humbling to realize how quickly my ignorance of tooling choice turned into something resembling a heap of tech debt.&lt;/p&gt;
+
+&lt;p&gt;Direct modeling was a simple, useful tool being abused with a mismatched use case. If you’re modeling anything (mechanical) of complexity you may &lt;em&gt;ever&lt;/em&gt; want to change, &lt;strong&gt;parametric modeling&lt;/strong&gt; is the way to go.&lt;/p&gt;
+
+&lt;p&gt;With parametric modeling, your source-of-truth is not the model in front of you – it’s the history of changes you made to get there, and your current model is a byproduct of those changes. Fusion 360 allows you to easily traverse that history:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button03/parametric-history.gif&quot; alt=&quot;parametric history&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;And because of that change in perspective, making fundamental modifications becomes incredibly easy. Think of it like a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git rebase&lt;/code&gt; – you’re inserting a change earlier in history, and then replaying the rest of the changes on top. When changes aren’t compatible, you even have the opportunity to resolve conflicts:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button03/parametric-modification.gif&quot; alt=&quot;parametric modifications&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;So, &lt;a href=&quot;https://www.youtube.com/watch?v=n-IsRIFzlHs&quot;&gt;parametric modeling is really powerful&lt;/a&gt; and it’s going to allow me to quickly iterate on this enclosure moving forwards.&lt;/p&gt;
+
+&lt;h2 id=&quot;gathering-parts&quot;&gt;Gathering parts&lt;/h2&gt;
+
+&lt;p&gt;When modeling an enclosure, the first thing I do is build rough-ins – replicas of all the parts I’m going to put in the enclosure. They don’t need to be perfect, but should have accurate measurements for any mounting holes, ports, anything where alignment is key.&lt;/p&gt;
+
+&lt;p&gt;We’ve got a couple parts to rough-in. The button and contact switch assembly:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button03/button.jpg&quot; alt=&quot;button&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;One of these batteries – we haven’t figured out how much juice (or room) we need yet:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button03/battery.jpg&quot; alt=&quot;battery&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;A power switch:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button03/switch.jpg&quot; alt=&quot;switch&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;And the Feather:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button03/nrf.jpg&quot; alt=&quot;feather nrf&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;We’ve got to measure all this stuff to actually model it. I recommend using &lt;a href=&quot;https://www.generaltools.com/6-in-steel-digital-caliper-1&quot;&gt;digital calipers&lt;/a&gt; for this work:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button03/measure.jpg&quot; alt=&quot;measure&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;modeling-the-rough-ins&quot;&gt;Modeling the rough-ins&lt;/h2&gt;
+
+&lt;p&gt;Let’s start with the switch.&lt;/p&gt;
+
+&lt;p&gt;When doing parametric modeling in Fusion, you’ll be working a lot with sketches and then extruding them into 3D shapes. Sketches are great because they allow you to define complex layout rules in a 2D space that can react automatically to future modifications.&lt;/p&gt;
+
+&lt;p&gt;For the switch, we’ll start with a rectangle sketch the width and depth of the switch, and then extrude the height:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button03/02-extrude.png&quot; alt=&quot;switch extrude&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Then we’ll make another sketch on the bottom of our new switch and build a rectangle for each pin:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button03/04-pins-sketch.png&quot; alt=&quot;switch pin sketch&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Extrude those pins, extrude a button, you get the idea. After a few more rectangles and a few more extrusions, we have something resembling a switch.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button03/05-switch.png&quot; alt=&quot;switch rough in&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The top of the switch is longer because we’re roughing in the &lt;em&gt;full range of motion&lt;/em&gt; of the switch, ensuring when we test for placement, the switch will be able to move back and forth freely.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button03/switch-model.jpg&quot; alt=&quot;switch model&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Okay, so I went a little lazy on the battery. &lt;a href=&quot;https://www.reddit.com/r/techsupportgore/comments/2g78tf/extreme_battery_expansion_on_an_iphone/&quot;&gt;LiPo batteries have been known to expand&lt;/a&gt;, so I was a little generous with the dimensions, and made a little nub to indicate where the wires exit.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button03/battery-model.jpg&quot; alt=&quot;battery model&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The &lt;a href=&quot;https://www.adafruit.com/feather&quot;&gt;Adafruit Feather&lt;/a&gt; line has standardized ports and mounting holes, so I assumed I would be able to find an existing model of &lt;em&gt;any&lt;/em&gt; Feather, and &lt;a href=&quot;https://gallery.autodesk.com/fusion360/projects/adafruit-wiced-feather&quot;&gt;sure enough, I did&lt;/a&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button03/feather-model.png&quot; alt=&quot;feather model&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Finally, the button, which I took extra care with, since it has such a big impact on the available space in the enclosure.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button03/contact-block-lofted.png&quot; alt=&quot;button model&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;modeling-the-enclosure&quot;&gt;Modeling the enclosure&lt;/h2&gt;
+
+&lt;p&gt;I’d like the enclosure to roughly match the diameter of the button, so let’s just drop this stuff in a cylinder and see how it fares:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button03/enclosure-rotate.gif&quot; alt=&quot;enclosure model&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;That battery looks like a problem. Additionally, I’d like the top of the enclosure to twist off, which means the button has to be free to twist with it:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button03/enclosure-button-spin.gif&quot; alt=&quot;enclosure spin model&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Okay, so we’ll go model the smaller battery and start there. There’s another issue, which is that the USB port and power switch don’t really work with a rounded surface:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button03/port-flat.gif&quot; alt=&quot;port flat&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Looks like we’re going to need to &lt;a href=&quot;https://www.apple.com/mac-pro/&quot;&gt;build a flat into our cyclinder&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;scope-creep&quot;&gt;Scope Creep&lt;/h2&gt;
+
+&lt;p&gt;Finally, the contact switch on the button really takes up a ton of good space – this is something I’d like to address, but it works and building an alternative is going to distract us from delivering V1. Let’s put it on our nice-to-haves list for now.&lt;/p&gt;
+
+&lt;h2 id=&quot;whats-next&quot;&gt;What’s next&lt;/h2&gt;
+
+&lt;p&gt;With the rough-ins done, we managed to visualize some potential issues. We’ll move to the smaller battery and then get to work on &lt;a href=&quot;/projects/posts/build-button-v1/&quot;&gt;making a v1 enclosure (Part 4: v1.0 complete)&lt;/a&gt; we can 3D print and test out.&lt;/p&gt;</content><author><name>garyjohnson</name></author><category term="build button" /><summary type="html">With the core idea now functional (Part 2: the proof-of-concept), it’s time to start working on a proper enclosure.</summary></entry><entry><title type="html">Bluetooth Build Button, Part 2: the proof-of-concept</title><link href="http://garyjohnson.github.io/projects/posts/button-mvp/" rel="alternate" type="text/html" title="Bluetooth Build Button, Part 2: the proof-of-concept" /><published>2019-02-27T07:59:00+00:00</published><updated>2019-02-27T07:59:00+00:00</updated><id>http://garyjohnson.github.io/projects/posts/button-mvp</id><content type="html" xml:base="http://garyjohnson.github.io/projects/posts/button-mvp/">&lt;p&gt;Well it didn’t take much to get the &lt;a href=&quot;/projects/posts/new-project/&quot;&gt;core idea (Part 1: new project)&lt;/a&gt; working.
+&lt;br /&gt;&lt;/p&gt;
+&lt;video controls=&quot;controls&quot; name=&quot;mvp&quot; src=&quot;/images/button02/button-mvp.mp4&quot; poster=&quot;/images/button02/button-thumbnail.png&quot; preload=&quot;auto&quot;&gt;&lt;/video&gt;
+&lt;p&gt;&lt;br /&gt;
+What you’re seeing here is the &lt;a href=&quot;https://www.adafruit.com/product/3406&quot;&gt;Adafruit Feather nrf52832&lt;/a&gt; acting as a bluetooth keyboard, paired to my Macbook, and sending &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CTRL+ALT+F12&lt;/code&gt; when I push the giant red button (mostly because it’s unlikely to be used by &lt;em&gt;anything&lt;/em&gt;). It’s powered by a 500mAh lipo battery and not wired to the Macbook at all.&lt;/p&gt;
+
+&lt;p&gt;In the video, I have iTerm bound to run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rake spec \n&lt;/code&gt; on &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CTRL+ALT+F12&lt;/code&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button02/iterm-binding.png&quot; alt=&quot;iterm binding&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Functional, but only useful for Ruby projects. We’ll consider &lt;a href=&quot;/articles/new-project/#scope-creep&quot;&gt;making this dynamic based on the current project directory&lt;/a&gt; a “stretch goal”.&lt;/p&gt;
+
+&lt;p&gt;Adafruit provides a &lt;a href=&quot;https://github.com/adafruit/Adafruit_nRF52_Arduino/blob/master/libraries/Bluefruit52Lib/examples/Peripheral/hid_keyboard/hid_keyboard.ino&quot;&gt;library with examples&lt;/a&gt; for using the nrf52 as a bluetooth keyboard, which provided enough juice to get my own version up and running:&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/garyjohnson/build-button/blob/cf1c7cafbe215add65a0cb004e41e90da2040dd3/firmware/build-button/build-button.ino&quot;&gt;build-button.ino (GitHub)&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;code-example&quot;&gt;Code Example&lt;/h2&gt;
+
+&lt;p&gt;We initialize Bluefruit BLEDis, and BLEHidAdafruit:&lt;/p&gt;
+
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// Radio level configuration&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Bluefruit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;begin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Bluefruit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;setTxPower&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Bluefruit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;setName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Build Button&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// BLE device information service&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;bledis&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;setManufacturer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Gary Johnson&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;bledis&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;setModel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Build Button&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;bledis&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;begin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// BLE HID service&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;blehid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;begin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And then start advertising as a HID keyboard:&lt;/p&gt;
+
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// start advertising our HID service&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Bluefruit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Advertising&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;addFlags&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Bluefruit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Advertising&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;addTxPower&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Bluefruit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Advertising&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;addAppearance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;BLE_APPEARANCE_HID_KEYBOARD&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Bluefruit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Advertising&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;addService&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;blehid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Bluefruit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Advertising&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;addName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Bluefruit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Advertising&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;restartOnDisconnect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Bluefruit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Advertising&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;setInterval&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;244&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;    &lt;span class=&quot;c1&quot;&gt;// in unit of 0.625 ms&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Bluefruit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Advertising&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;setFastTimeout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;30&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;      &lt;span class=&quot;c1&quot;&gt;// number of seconds in fast mode&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Bluefruit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Advertising&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;start&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;                &lt;span class=&quot;c1&quot;&gt;// 0 = Don't stop advertising after n seconds&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;When the button is pushed, we send our &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CTRL+ALT+F12&lt;/code&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;digitalRead&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PIN_BUTTON&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;blehid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;keyboardReport&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;KEYBOARD_MODIFIER_LEFTCTRL&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;KEYBOARD_MODIFIER_LEFTALT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HID_KEY_F12&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And send the key up event when done:&lt;/p&gt;
+
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;blehid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;keyRelease&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And that’s it! We have a bluetooth keyboard – check the &lt;a href=&quot;https://github.com/garyjohnson/build-button/blob/cf1c7cafbe215add65a0cb004e41e90da2040dd3/firmware/build-button/build-button.ino&quot;&gt;GitHub page for the complete implementation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;scope-creep&quot;&gt;Scope Creep&lt;/h2&gt;
+
+&lt;p&gt;I really wanted to avoid the Arduino IDE as much as possible – I do a lot of my work in neovim from the command line. Building command line tooling also means that my build is automatable on a headless system, which I always see as a virtue when working remotely through SSH or deploying using a &lt;a href=&quot;https://circleci.com&quot;&gt;CI / CD pipeline&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I started with &lt;a href=&quot;https://github.com/amperka/ino&quot;&gt;ino&lt;/a&gt;, but unfortunately the last commit was in 2014 and it no longer functions with the latest version of Arduino IDE.&lt;/p&gt;
+
+&lt;p&gt;Then I tried using the &lt;a href=&quot;https://github.com/arduino/arduino-cli&quot;&gt;arduino-cli&lt;/a&gt; to build a &lt;a href=&quot;https://github.com/garyjohnson/build-button/blob/cf1c7cafbe215add65a0cb004e41e90da2040dd3/firmware/Makefile&quot;&gt;Makefile (GitHub)&lt;/a&gt; but couldn’t quite get it functioning with the Adafruit nrf52.&lt;/p&gt;
+
+&lt;p&gt;Might come back and revisit this later, but for now I’m going to have to let this go.&lt;/p&gt;
+
+&lt;h2 id=&quot;next-steps&quot;&gt;Next Steps&lt;/h2&gt;
+
+&lt;p&gt;It’s time to &lt;a href=&quot;/projects/posts/enclosure-rough-ins/&quot;&gt;design an enclosure (Part 3: enclosure rough-ins)&lt;/a&gt;!&lt;/p&gt;</content><author><name>garyjohnson</name></author><category term="build button" /><summary type="html">Well it didn’t take much to get the core idea (Part 1: new project) working. What you’re seeing here is the Adafruit Feather nrf52832 acting as a bluetooth keyboard, paired to my Macbook, and sending CTRL+ALT+F12 when I push the giant red button (mostly because it’s unlikely to be used by anything). It’s powered by a 500mAh lipo battery and not wired to the Macbook at all.</summary></entry><entry><title type="html">Bluetooth Build Button, Part 1: project planning</title><link href="http://garyjohnson.github.io/projects/posts/new-project/" rel="alternate" type="text/html" title="Bluetooth Build Button, Part 1: project planning" /><published>2019-02-26T21:42:00+00:00</published><updated>2019-02-26T21:42:00+00:00</updated><id>http://garyjohnson.github.io/projects/posts/new-project</id><content type="html" xml:base="http://garyjohnson.github.io/projects/posts/new-project/">&lt;p&gt;It’s time for a new project! I’ve been starting projects and enjoying not finishing them, but I’ve been feeling the itch to carry something small and focused all the way through design, documentation, and delivery.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-idea&quot;&gt;The Idea&lt;/h2&gt;
+
+&lt;p&gt;A few years ago I built a build &lt;a href=&quot;https://www.automationdirect.com/adc/shopping/catalog/pushbuttons_-z-_switches_-z-_indicators/22mm_metal/mushroom_pushbuttons_illuminated_-a-_non-illuminated/gcx1137&quot;&gt;button&lt;/a&gt; to run my tests – a simple &lt;a href=&quot;https://www.pjrc.com/teensy/teensy31.html&quot;&gt;Teensy&lt;/a&gt; that connects as a HID keyboard and sends a key combo when the button is pushed. In IDEs, I bound the key combo to running tests, and in iTerm to send &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rake spec \n&lt;/code&gt; (not very flexible for moving between types of projects).&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button01/button.jpg&quot; alt=&quot;original button&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Moving between computers with USB and USB-C ports makes the original button a little more annoying to use, so I’d like to go wireless. In 2019 there’s lots of great bluetooth hardware available. 
+The &lt;a href=&quot;https://www.adafruit.com/product/3406&quot;&gt;Adafruit Feather nrf52832&lt;/a&gt; is relatively inexpensive, has a battery charging circuit, &lt;a href=&quot;https://learn.adafruit.com/bluefruit-nrf52-feather-learning-guide/blehidadafruit&quot;&gt;can emulate a bluetooth keyboard&lt;/a&gt;, and I happen to have two of them already.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button01/nrf.jpg&quot; alt=&quot;feather nrf52832&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;So that’s the plan – a bluetooth button that can run my tests and has an internal battery with USB charging.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/button01/button-sketch.jpg&quot; alt=&quot;button sketch&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;scope-creep&quot;&gt;Scope Creep&lt;/h2&gt;
+
+&lt;p&gt;There’s a couple other things I’d like to tackle as part of this project, all of them negotiable:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Utilizing &lt;a href=&quot;https://github.com/arduino-libraries/ArduinoLowPower/blob/master/examples/PrimoDeepSleep/PrimoDeepSleep.ino&quot;&gt;deep sleep capabilities on the nrf52&lt;/a&gt; for really, really long battery life&lt;/li&gt;
+  &lt;li&gt;Running the correct test command based on the project or directory&lt;/li&gt;
+  &lt;li&gt;Ability to easily open and close the enclosure without additional hardware:
+&lt;img src=&quot;/images/button01/button-snap.jpg&quot; alt=&quot;snap design&quot; /&gt;&lt;/li&gt;
+  &lt;li&gt;I want the button to provide feedback at minimum, and maybe have the capability of being an I/O device. Could be some combination of sound, vibration, and light. Here’s some ideas incorporating an &lt;a href=&quot;https://www.adafruit.com/product/1586&quot;&gt;Adafruit NeoPixel Ring&lt;/a&gt;:
+&lt;img src=&quot;/images/button01/button-io.jpg&quot; alt=&quot;io&quot; /&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;next-steps&quot;&gt;Next Steps&lt;/h2&gt;
+
+&lt;p&gt;That’s it! Next post I’ll dive into building the proof-of-concept:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Press the built-in button on the nrf52 and be able to trigger a bluetooth keyboard press&lt;/li&gt;
+  &lt;li&gt;Wiring up the button, nrf52, battery, power switch&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;a href=&quot;/projects/posts/button-mvp/&quot;&gt;Bluetooth Build Button, Part 2: the proof-of-concept&lt;/a&gt;&lt;/p&gt;</content><author><name>garyjohnson</name></author><category term="build button" /><summary type="html">It’s time for a new project! I’ve been starting projects and enjoying not finishing them, but I’ve been feeling the itch to carry something small and focused all the way through design, documentation, and delivery.</summary></entry></feed>

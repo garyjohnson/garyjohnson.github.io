@@ -1,0 +1,611 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Bluetooth Build Button, Part 2: the proof-of-concept - Gary’s Work in Progress</title>
+<meta name="description" content="Well it didn’t take much to get the core idea (Part 1: new project) working.    What you’re seeing here is the Adafruit Feather nrf52832 acting as a bluetooth keyboard, paired to my Macbook, and sending CTRL+ALT+F12 when I push the giant red button (mostly because it’s unlikely to be used by anything). It’s powered by a 500mAh lipo battery and not wired to the Macbook at all.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Gary's Work in Progress">
+<meta property="og:title" content="Bluetooth Build Button, Part 2: the proof-of-concept">
+<meta property="og:url" content="http://garyjohnson.github.io/projects/posts/button-mvp/">
+
+
+  <meta property="og:description" content="Well it didn’t take much to get the core idea (Part 1: new project) working.    What you’re seeing here is the Adafruit Feather nrf52832 acting as a bluetooth keyboard, paired to my Macbook, and sending CTRL+ALT+F12 when I push the giant red button (mostly because it’s unlikely to be used by anything). It’s powered by a 500mAh lipo battery and not wired to the Macbook at all.">
+
+
+
+  <meta property="og:image" content="http://garyjohnson.github.io/images/button02/header.jpg">
+
+
+
+
+
+  <meta property="article:published_time" content="2019-02-27T07:59:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="http://garyjohnson.github.io/projects/posts/button-mvp/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "http://garyjohnson.github.io/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Gary's Work in Progress Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          Gary's Work in Progress
+          
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/projects/">Projects</a>
+            </li></ul>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+  
+
+
+
+
+
+
+
+<div class="page__hero"
+  style=" background-image: url('');"
+>
+  
+    <img src="/images/button02/header.jpg" alt="Bluetooth Build Button, Part 2: the proof-of-concept" class="page__hero-image">
+  
+  
+</div>
+
+
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name"></h3>
+    
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Bluetooth Build Button, Part 2: the proof-of-concept">
+    <meta itemprop="description" content="Well it didn’t take much to get the core idea (Part 1: new project) working.What you’re seeing here is the Adafruit Feather nrf52832 acting as a bluetooth keyboard, paired to my Macbook, and sending CTRL+ALT+F12 when I push the giant red button (mostly because it’s unlikely to be used by anything). It’s powered by a 500mAh lipo battery and not wired to the Macbook at all.">
+    <meta itemprop="datePublished" content="2019-02-27T07:59:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Bluetooth Build Button, Part 2: the proof-of-concept
+</h1>
+          
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>Well it didn’t take much to get the <a href="/projects/posts/new-project/">core idea (Part 1: new project)</a> working.
+<br /></p>
+<video controls="controls" name="mvp" src="/images/button02/button-mvp.mp4" poster="/images/button02/button-thumbnail.png" preload="auto"></video>
+<p><br />
+What you’re seeing here is the <a href="https://www.adafruit.com/product/3406">Adafruit Feather nrf52832</a> acting as a bluetooth keyboard, paired to my Macbook, and sending <code class="language-plaintext highlighter-rouge">CTRL+ALT+F12</code> when I push the giant red button (mostly because it’s unlikely to be used by <em>anything</em>). It’s powered by a 500mAh lipo battery and not wired to the Macbook at all.</p>
+
+<p>In the video, I have iTerm bound to run <code class="language-plaintext highlighter-rouge">rake spec \n</code> on <code class="language-plaintext highlighter-rouge">CTRL+ALT+F12</code>:</p>
+
+<p><img src="/images/button02/iterm-binding.png" alt="iterm binding" /></p>
+
+<p>Functional, but only useful for Ruby projects. We’ll consider <a href="/articles/new-project/#scope-creep">making this dynamic based on the current project directory</a> a “stretch goal”.</p>
+
+<p>Adafruit provides a <a href="https://github.com/adafruit/Adafruit_nRF52_Arduino/blob/master/libraries/Bluefruit52Lib/examples/Peripheral/hid_keyboard/hid_keyboard.ino">library with examples</a> for using the nrf52 as a bluetooth keyboard, which provided enough juice to get my own version up and running:</p>
+
+<p><a href="https://github.com/garyjohnson/build-button/blob/cf1c7cafbe215add65a0cb004e41e90da2040dd3/firmware/build-button/build-button.ino">build-button.ino (GitHub)</a></p>
+
+<h2 id="code-example">Code Example</h2>
+
+<p>We initialize Bluefruit BLEDis, and BLEHidAdafruit:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Radio level configuration</span>
+<span class="n">Bluefruit</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+<span class="n">Bluefruit</span><span class="p">.</span><span class="n">setTxPower</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
+<span class="n">Bluefruit</span><span class="p">.</span><span class="n">setName</span><span class="p">(</span><span class="s">"Build Button"</span><span class="p">);</span>
+
+<span class="c1">// BLE device information service</span>
+<span class="n">bledis</span><span class="p">.</span><span class="n">setManufacturer</span><span class="p">(</span><span class="s">"Gary Johnson"</span><span class="p">);</span>
+<span class="n">bledis</span><span class="p">.</span><span class="n">setModel</span><span class="p">(</span><span class="s">"Build Button"</span><span class="p">);</span>
+<span class="n">bledis</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+
+<span class="c1">// BLE HID service</span>
+<span class="n">blehid</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+</code></pre></div></div>
+
+<p>And then start advertising as a HID keyboard:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// start advertising our HID service</span>
+<span class="n">Bluefruit</span><span class="p">.</span><span class="n">Advertising</span><span class="p">.</span><span class="n">addFlags</span><span class="p">(</span><span class="n">BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE</span><span class="p">);</span>
+<span class="n">Bluefruit</span><span class="p">.</span><span class="n">Advertising</span><span class="p">.</span><span class="n">addTxPower</span><span class="p">();</span>
+<span class="n">Bluefruit</span><span class="p">.</span><span class="n">Advertising</span><span class="p">.</span><span class="n">addAppearance</span><span class="p">(</span><span class="n">BLE_APPEARANCE_HID_KEYBOARD</span><span class="p">);</span>
+<span class="n">Bluefruit</span><span class="p">.</span><span class="n">Advertising</span><span class="p">.</span><span class="n">addService</span><span class="p">(</span><span class="n">blehid</span><span class="p">);</span>
+<span class="n">Bluefruit</span><span class="p">.</span><span class="n">Advertising</span><span class="p">.</span><span class="n">addName</span><span class="p">();</span>
+<span class="n">Bluefruit</span><span class="p">.</span><span class="n">Advertising</span><span class="p">.</span><span class="n">restartOnDisconnect</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+<span class="n">Bluefruit</span><span class="p">.</span><span class="n">Advertising</span><span class="p">.</span><span class="n">setInterval</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">244</span><span class="p">);</span>    <span class="c1">// in unit of 0.625 ms</span>
+<span class="n">Bluefruit</span><span class="p">.</span><span class="n">Advertising</span><span class="p">.</span><span class="n">setFastTimeout</span><span class="p">(</span><span class="mi">30</span><span class="p">);</span>      <span class="c1">// number of seconds in fast mode</span>
+<span class="n">Bluefruit</span><span class="p">.</span><span class="n">Advertising</span><span class="p">.</span><span class="n">start</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>                <span class="c1">// 0 = Don't stop advertising after n seconds</span>
+</code></pre></div></div>
+
+<p>When the button is pushed, we send our <code class="language-plaintext highlighter-rouge">CTRL+ALT+F12</code>:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="p">(</span> <span class="n">digitalRead</span><span class="p">(</span><span class="n">PIN_BUTTON</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="p">)</span> <span class="p">{</span>
+  <span class="n">blehid</span><span class="p">.</span><span class="n">keyboardReport</span><span class="p">(</span><span class="n">KEYBOARD_MODIFIER_LEFTCTRL</span><span class="o">|</span><span class="n">KEYBOARD_MODIFIER_LEFTALT</span><span class="p">,</span> <span class="n">HID_KEY_F12</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>And send the key up event when done:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">blehid</span><span class="p">.</span><span class="n">keyRelease</span><span class="p">();</span>
+</code></pre></div></div>
+
+<p>And that’s it! We have a bluetooth keyboard – check the <a href="https://github.com/garyjohnson/build-button/blob/cf1c7cafbe215add65a0cb004e41e90da2040dd3/firmware/build-button/build-button.ino">GitHub page for the complete implementation</a>.</p>
+
+<h2 id="scope-creep">Scope Creep</h2>
+
+<p>I really wanted to avoid the Arduino IDE as much as possible – I do a lot of my work in neovim from the command line. Building command line tooling also means that my build is automatable on a headless system, which I always see as a virtue when working remotely through SSH or deploying using a <a href="https://circleci.com">CI / CD pipeline</a>.</p>
+
+<p>I started with <a href="https://github.com/amperka/ino">ino</a>, but unfortunately the last commit was in 2014 and it no longer functions with the latest version of Arduino IDE.</p>
+
+<p>Then I tried using the <a href="https://github.com/arduino/arduino-cli">arduino-cli</a> to build a <a href="https://github.com/garyjohnson/build-button/blob/cf1c7cafbe215add65a0cb004e41e90da2040dd3/firmware/Makefile">Makefile (GitHub)</a> but couldn’t quite get it functioning with the Adafruit nrf52.</p>
+
+<p>Might come back and revisit this later, but for now I’m going to have to let this go.</p>
+
+<h2 id="next-steps">Next Steps</h2>
+
+<p>It’s time to <a href="/projects/posts/enclosure-rough-ins/">design an enclosure (Part 3: enclosure rough-ins)</a>!</p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-02-27T07:59:00+00:00">February 27, 2019</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?text=Bluetooth+Build+Button%2C+Part+2%3A+the+proof-of-concept%20http%3A%2F%2Fgaryjohnson.github.io%2Fprojects%2Fposts%2Fbutton-mvp%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Fgaryjohnson.github.io%2Fprojects%2Fposts%2Fbutton-mvp%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Fgaryjohnson.github.io%2Fprojects%2Fposts%2Fbutton-mvp%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/projects/posts/new-project/" class="pagination--pager" title="Bluetooth Build Button, Part 1: project planning
+">Previous</a>
+    
+    
+      <a href="/projects/posts/enclosure-rough-ins/" class="pagination--pager" title="Bluetooth Build Button, Part 3: the enclosure rough-ins
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/projects/posts/crashes-and-animations/" rel="permalink">Bluetooth Build Button, Part 7: crashes and animations
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          4 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Previously, we added LEDs for feedback (Part 6: lights and a power switch), and ended up with a number of problems to fix. The most blocking was an issue whe...</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/projects/posts/lights-and-a-power-switch/" rel="permalink">Bluetooth Build Button, Part 6: lights and a power switch
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          3 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">With a basic software implementation completed (Part 5: the software), we can spend some time using it day-to-day and build incremental improvements.
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/projects/posts/software/" rel="permalink">Bluetooth Build Button, Part 5: the software
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          4 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Now that v1.0 is out of the way (Part 4: v1.0 complete), we can spend some time using it day-to-day and build incremental improvements.
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/projects/posts/build-button-v1/" rel="permalink">Bluetooth Build Button, Part 4: v1.0 complete
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">With the rough-ins in place (Part 3: the enclosure rough-ins), we can build out the enclosure.
+
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Gary's Work in Progress. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

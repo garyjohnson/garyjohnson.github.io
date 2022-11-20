@@ -1,0 +1,641 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Bluetooth Build Button, Part 7: crashes and animations - Gary’s Work in Progress</title>
+<meta name="description" content="Previously, we added LEDs for feedback (Part 6: lights and a power switch), and ended up with a number of problems to fix. The most blocking was an issue where making changes to the firmware started causing inexplicable crashes.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Gary's Work in Progress">
+<meta property="og:title" content="Bluetooth Build Button, Part 7: crashes and animations">
+<meta property="og:url" content="http://garyjohnson.github.io/projects/posts/crashes-and-animations/">
+
+
+  <meta property="og:description" content="Previously, we added LEDs for feedback (Part 6: lights and a power switch), and ended up with a number of problems to fix. The most blocking was an issue where making changes to the firmware started causing inexplicable crashes.">
+
+
+
+  <meta property="og:image" content="http://garyjohnson.github.io/images/button07/cover.jpg">
+
+
+
+
+
+  <meta property="article:published_time" content="2019-05-11T10:29:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="http://garyjohnson.github.io/projects/posts/crashes-and-animations/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "http://garyjohnson.github.io/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Gary's Work in Progress Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          Gary's Work in Progress
+          
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/projects/">Projects</a>
+            </li></ul>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+  
+
+
+
+
+
+
+
+<div class="page__hero"
+  style=" background-image: url('');"
+>
+  
+    <img src="/images/button07/cover.jpg" alt="Bluetooth Build Button, Part 7: crashes and animations" class="page__hero-image">
+  
+  
+</div>
+
+
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name"></h3>
+    
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Bluetooth Build Button, Part 7: crashes and animations">
+    <meta itemprop="description" content="Previously, we added LEDs for feedback (Part 6: lights and a power switch), and ended up with a number of problems to fix. The most blocking was an issue where making changes to the firmware started causing inexplicable crashes.">
+    <meta itemprop="datePublished" content="2019-05-11T10:29:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Bluetooth Build Button, Part 7: crashes and animations
+</h1>
+          
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          4 minute read
+        
+      </span>
+    
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>Previously, we <a href="/projects/posts/lights-and-a-power-switch/">added LEDs for feedback (Part 6: lights and a power switch)</a>, and ended up with a number of problems to fix. The most blocking was an issue where making changes to the firmware started causing inexplicable crashes.</p>
+
+<h2 id="crashes">Crashes</h2>
+
+<p>While working on animation code, I ran into an issue with the firmware where adding doing seemingly trivial things in the code (declaring new unused variables or adding empty methods to a class for example) would compile but result in completely non-functional firmware. After flashing the firmware, the board LED would blink red a couple times and then become unresponsive.</p>
+
+<p>I took a couple troubleshooting steps: could I be out of memory? Checked the global memory usage output by the compiler and also at runtime (with a functioning version of the firmware) and there appeared to be pleny of free memory.</p>
+
+<p>A friend suggested the possibility of defective hardware (a bad block in memory where the firmware is stored, maybe), but I had some extra, identical boards to test on and they had the same issue.</p>
+
+<p>Another possibility could be something in the toolchain, but debugging that felt like a total rabbit hole.</p>
+
+<p>My next step was going to be ordering a <a href="https://www.adafruit.com/product/3571">JTAG debugger</a> and seeing if I could at least sniff out some more detailed error info and enable better debugging. However, at some point in this process Adafruit released a new version (0.10.1) of <a href="https://github.com/adafruit/Adafruit_nRF52_Arduino/releases">Adafruit_nRF52_Arduino</a>, which (I think) is the toolchain, bootloader, and libraries that enable programming the Feather from the Arduino IDE. After upgrading, all my issues dissapeared. I’m not sure what exactly was broken, but I’ll take it as a lucky win.</p>
+
+<p>Onward, to animations.</p>
+
+<h2 id="animations">Animations</h2>
+
+<p>One problem encountered during use is feedback – once I release the button, the LEDs turn off immediately. It can be a little confusing to know what stage I just triggered (run test, run file, run all tests), but mostly it’s just unsatisfying.
+<br /></p>
+<video controls="controls" name="no-feedback" src="/images/button07/no-feedback.mp4" poster="/images/button07/no-feedback-thumbnail.jpg" preload="auto"></video>
+<p><br /></p>
+
+<h3 id="an-end-to-delays">An End to Delays</h3>
+
+<p>There’s a couple ways to approach building a feedback animation. It’s pretty common when starting with programming micros like an Arduino to encounter code like this:</p>
+
+<figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">digitalWrite</span><span class="p">(</span><span class="n">LED_BUILTIN</span><span class="p">,</span> <span class="n">HIGH</span><span class="p">);</span>   <span class="c1">// turn the LED on (HIGH is the voltage level)</span>
+  <span class="n">delay</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>                       <span class="c1">// wait for a second</span>
+  <span class="n">digitalWrite</span><span class="p">(</span><span class="n">LED_BUILTIN</span><span class="p">,</span> <span class="n">LOW</span><span class="p">);</span>    <span class="c1">// turn the LED off by making the voltage LOW</span>
+  <span class="n">delay</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>                       <span class="c1">// wait for a second</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>…in fact, this is from the Arduino built-in examples. And it’s a fine approach if all you’re doing is blinking an LED. What happens if you want to check for a button press?</p>
+
+<figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">digitalWrite</span><span class="p">(</span><span class="n">LED_BUILTIN</span><span class="p">,</span> <span class="n">HIGH</span><span class="p">);</span>   <span class="c1">// turn the LED on (HIGH is the voltage level)</span>
+  <span class="n">delay</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>                       <span class="c1">// wait for a second</span>
+  <span class="n">digitalWrite</span><span class="p">(</span><span class="n">LED_BUILTIN</span><span class="p">,</span> <span class="n">LOW</span><span class="p">);</span>    <span class="c1">// turn the LED off by making the voltage LOW</span>
+  <span class="n">delay</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>                       <span class="c1">// wait for a second</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">digitalRead</span><span class="p">(</span><span class="n">BUTTON</span><span class="p">)</span> <span class="o">==</span> <span class="n">HIGH</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// do stuff</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>If you briefly press the button here, there’s a high chance it won’t work – to be 100% sure you’ll trigger your button handler, you’d have to hold the button down for &gt; 2 seconds.</p>
+
+<p>Rather than programatically defining our animation using <code class="language-plaintext highlighter-rouge">delay</code> to guarantee timing, let’s <em>calculate</em> our animation state at any given time:</p>
+
+<figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">blinkDuration</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">;</span>
+
+<span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">previousMillis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">currentMillis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">currentMillis</span> <span class="o">=</span> <span class="n">millis</span><span class="p">();</span>
+
+  <span class="c1">// current time divided by the duration of a blink (on or off) will</span>
+  <span class="c1">// give us a "count" of how many animation phases have happened</span>
+  <span class="c1">// ex: 3400 millis / 1000 blink phase = 3 phases</span>
+  <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">blinkPhase</span> <span class="o">=</span> <span class="n">currentMillis</span> <span class="o">/</span> <span class="n">blinkDuration</span><span class="p">;</span>
+
+  <span class="k">if</span><span class="p">(</span><span class="n">blinkPhase</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// odd phase, light off</span>
+    <span class="n">digitalWrite</span><span class="p">(</span><span class="n">LED_BUILTIN</span><span class="p">,</span> <span class="n">LOW</span><span class="p">);</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="c1">// even phase, light on</span>
+    <span class="n">digitalWrite</span><span class="p">(</span><span class="n">LED_BUILTIN</span><span class="p">,</span> <span class="n">HIGH</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span><span class="p">(</span><span class="n">digitalRead</span><span class="p">(</span><span class="n">BUTTON</span><span class="p">)</span> <span class="o">==</span> <span class="n">HIGH</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// do stuff</span>
+  <span class="p">}</span>
+
+  <span class="n">previousMillis</span> <span class="o">=</span> <span class="n">currentMillis</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>Look! No delays. A couple notes on how that example isn’t perfect:</p>
+
+<ol>
+  <li>because we don’t use the remainder of <code class="language-plaintext highlighter-rouge">currentMillis / blinkDuration</code>, there’s a very slight delay to the animation on start.</li>
+  <li>At some point <code class="language-plaintext highlighter-rouge">millis()</code> will reach the max value that can fit in an <code class="language-plaintext highlighter-rouge">unsigned long</code> and rollover to zero – we may see a hitch in the animation during that time (two seconds of being lit up, or two seconds of being off).</li>
+  <li>We rely on the simplicity of the animation being a two-state – what if we want to fade the LEDs in and out or have multiple states?</li>
+  <li>The blinking always happens – what if we want to trigger the blinking on button press, for a certain amount of time? What if we want to be able to interrupt it?</li>
+</ol>
+
+<p>For a better and more detailed tutorial along these same lines, check out <a href="https://learn.adafruit.com/multi-tasking-the-arduino-part-1/overview">Adafruit’s ‘multi-tasking the arduino’</a></p>
+
+<h2 id="feedback-animation">Feedback Animation</h2>
+
+<p>It’s with that approach in mind that I tackled feedback animations: <a href="https://github.com/garyjohnson/build-button/blob/f2ebf5d35bc040f05dc32b6827a9f14501823eb3/firmware/build-button/LedApp.cpp#L41-L59">LedApp.cpp</a>.</p>
+
+<figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="n">pixels</span><span class="p">.</span><span class="n">setBrightness</span><span class="p">((</span><span class="n">sin</span><span class="p">((</span><span class="kt">float</span><span class="p">)</span><span class="n">animationDuration</span><span class="o">/</span><span class="n">divisor</span><span class="p">)</span> <span class="o">*</span> <span class="mf">125.0</span><span class="n">f</span><span class="p">)</span> <span class="o">+</span> <span class="mf">130.0</span><span class="n">f</span><span class="p">);</span></code></pre></figure>
+
+<p>The real key in there is <code class="language-plaintext highlighter-rouge">sin()</code> – we’re using a sine function to ramp the brightness of the LEDs up and down in a smooth “blinking” fashion. The rest of the math is there to a) ensure the blinking is the right speed and b) ensure that the animation starts on the peak of the sine wave (we want to start the animation at full brightness, so that it appears to transition smoothly from the pushed state).</p>
+
+<p><br /></p>
+<video controls="controls" name="animation" src="/images/button07/animation.mp4" poster="/images/button07/animation-thumbnail.jpg" preload="auto"></video>
+<p><br /></p>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p>Every day I need to charge the button even when powered off – it’s time to rework the power switch. Also, the lid not “locking” into place is troublesome – it pops off frequently.</p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-05-11T10:29:00+00:00">May 11, 2019</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?text=Bluetooth+Build+Button%2C+Part+7%3A+crashes+and+animations%20http%3A%2F%2Fgaryjohnson.github.io%2Fprojects%2Fposts%2Fcrashes-and-animations%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Fgaryjohnson.github.io%2Fprojects%2Fposts%2Fcrashes-and-animations%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Fgaryjohnson.github.io%2Fprojects%2Fposts%2Fcrashes-and-animations%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/projects/posts/lights-and-a-power-switch/" class="pagination--pager" title="Bluetooth Build Button, Part 6: lights and a power switch
+">Previous</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/projects/posts/lights-and-a-power-switch/" rel="permalink">Bluetooth Build Button, Part 6: lights and a power switch
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          3 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">With a basic software implementation completed (Part 5: the software), we can spend some time using it day-to-day and build incremental improvements.
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/projects/posts/software/" rel="permalink">Bluetooth Build Button, Part 5: the software
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          4 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Now that v1.0 is out of the way (Part 4: v1.0 complete), we can spend some time using it day-to-day and build incremental improvements.
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/projects/posts/build-button-v1/" rel="permalink">Bluetooth Build Button, Part 4: v1.0 complete
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">With the rough-ins in place (Part 3: the enclosure rough-ins), we can build out the enclosure.
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/projects/posts/enclosure-rough-ins/" rel="permalink">Bluetooth Build Button, Part 3: the enclosure rough-ins
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          4 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">With the core idea now functional (Part 2: the proof-of-concept), it’s time to start working on a proper enclosure.
+
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Gary's Work in Progress. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>
